@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GDT1.Projectile
+namespace GDT1.Game.Projectile
 {
     public class Bullet : MonoBehaviour
     {

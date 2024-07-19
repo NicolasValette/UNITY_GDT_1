@@ -1,12 +1,12 @@
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace GDT1.Inputs
 {
     [RequireComponent(typeof(PlayerInput))]
-    public class Move : MonoBehaviour
+    public class MoveInput : MonoBehaviour
     {
+
         [SerializeField]
         private Transform _objectToMove;
         [SerializeField]
@@ -16,26 +16,13 @@ namespace GDT1.Inputs
 
         private Vector3 _moveDirection = Vector3.zero;
 
-        // Start is called before the first frame update
-        void Start()
-        {
-          
-        }
-
         // Update is called once per frame
         void Update()
         {
             MakeMove();
             MakeRotate();
         }
-        public void OnMove(InputValue value)
-        {
-          
-            //On récupère l'input de cette frame et on le met dans une variable pour l'appliquer
-            Vector2 inputValue = value.Get<Vector2>();
-            _moveDirection = new Vector3(inputValue.x, inputValue.y, 0f);
-        }
-        
+
         private void MakeMove()
         {
             _objectToMove.Translate(_moveDirection * _speed * Time.deltaTime, Space.World);
@@ -46,10 +33,16 @@ namespace GDT1.Inputs
             {
                 Quaternion rotation = Quaternion.LookRotation(Vector3.forward, _moveDirection);
                 _objectToMove.rotation = Quaternion.RotateTowards(_objectToMove.rotation, rotation, _rotationSpeed * Time.deltaTime);
-
             }
-            //     _objectToMove.rotation = Quaternion.Slerp(_objectToMove.rotation, Quaternion.LookRotation(_moveDirection - _objectToMove.position), 0.15f);
-
+        }
+        public void MoveDirection(Vector2 direction)
+        {
+            _moveDirection = new Vector3(direction.x, direction.y, 0f);
+        }
+        public void OnMove(InputValue value)
+        {
+            //On récupère l'input de cette frame et on le met dans une variable pour l'appliquer
+            _moveDirection = value.Get<Vector2>();
         }
     }
 }
