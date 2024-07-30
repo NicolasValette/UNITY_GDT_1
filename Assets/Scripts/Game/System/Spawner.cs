@@ -40,11 +40,9 @@ namespace GDT1.Game.System
 
         private void Spawn()
         {
-            Debug.Log("Spawn");
             switch (_spawnMode)
             {
                 case SpawnMode.AllPosEachTime:
-                    Debug.Log("Spawn all pos");
                     for (int i = 0; i < _spawnPos.Count; i++)
                     {
                         Instantiate(_objectToSpawn, _spawnPos[i].position, _spawnPos[i].rotation);
@@ -53,7 +51,6 @@ namespace GDT1.Game.System
                
                 case SpawnMode.OnePosbyOnePos:
                 default:
-                    Debug.Log("Spawn 1b1");
                     Instantiate(_objectToSpawn, _spawnPos[_currentSpawningInd].position, _spawnPos[_currentSpawningInd].rotation);
                     _currentSpawningInd = (_currentSpawningInd + 1) % _spawnPos.Count;
                     break;
