@@ -19,6 +19,21 @@ namespace GDT1.Inputs
 
         private Vector3 _moveDirection = Vector3.zero;
 
+        // To store the normal, small, and big sizes
+        private Vector3 _normalSize;
+        private Vector3 _smallSize;
+        private Vector3 _bigSize;
+
+        void Start()
+        {
+            // Store the initial scale as the normal size
+            _normalSize = _objectToMove.localScale;
+
+            // Calculate small and big sizes based on the normal size. WHY DOESN'T THIS WORK?
+            _smallSize = _normalSize - new Vector3(2f, 2f, 0f);
+            _bigSize = _normalSize + new Vector3(2f, 2f, 0f);
+        }
+
         void Update()
         {
             MakeMove();
@@ -58,15 +73,19 @@ namespace GDT1.Inputs
 
         private void UpdateScale()
         {
-            float scale = Mathf.Lerp(0.8f, 1.5f, (_currentZLevel - 0.5f) / 1.0f); // Adjust this mapping as needed
-            _objectToMove.localScale = new Vector3(scale, scale, 1f);
-        }
-
-        private void UpdateZPosition()
-        {
-            Vector3 position = _objectToMove.position;
-            position.z = _currentZLevel;
-            _objectToMove.position = position;
+            // Adjust the scale based on the current z-level
+            if (_currentZLevel == 0.5f)
+            {
+                _objectToMove.localScale = _smallSize;
+            }
+            else if (_currentZLevel == 1.0f)
+            {
+                _objectToMove.localScale = _normalSize;
+            }
+            else if (_currentZLevel == 1.5f)
+            {
+                _objectToMove.localScale = _bigSize;
+            }
         }
 
         public void MoveDirection(Vector2 direction)

@@ -24,41 +24,47 @@ namespace GDT1.AIBot
         private float _rotationSpeed;
 
         [SerializeField]
-        private Vector2 _minBounds = new Vector2(-20, -20); // Default min bounds
+        private Vector2 _minBounds = new Vector2(-20, -20);
         [SerializeField]
-        private Vector2 _maxBounds = new Vector2(20, 20); // Default max bounds
+        private Vector2 _maxBounds = new Vector2(20, 20);
 
         [SerializeField]
-        private float _minSpawnDistanceFromPlayer = 1f; // Minimum distance from player after spawning
+        private float _minSpawnDistanceFromPlayer = 1f;
 
         private Transform _detectedPlayer;
         private Vector3 _moveDirection;
-        private float _currentZLevel = 1f; // Default z level
-        private bool _canDetectPlayer = false; // Flag to prevent immediate detection
+        private float _currentZLevel = 1f;
+        private bool _canDetectPlayer = false;
 
-        // Z-levels and corresponding scales
-        private readonly float[] zLevels = { 0.5f, 1.0f, 1.5f };
-        private readonly float[] scales = { 0.8f, 1.15f, 1.5f };
+        private Vector3 _normalSize;
+        private Vector3 _smallSize;
+        private Vector3 _bigSize;
 
         void Start()
         {
             _triggerCollider.radius = _detectionRadius;
-            StartCoroutine(StartMovingAfterDelay(1f)); // Add delay before detecting and moving
-            UpdateScale(); // Ensure initial scale is set
+            StartCoroutine(StartMovingAfterDelay(1f));
+
+            // Store the initial scale as the normal size
+            _normalSize = _objectToMove.localScale;
+
+            // Calculate small and big sizes based on the normal size
+            _smallSize = _normalSize - new Vector3(2f, 2f, 0f);
+            _bigSize = _normalSize + new Vector3(2f, 2f, 0f);
+
+            UpdateScale();
         }
 
         private void Update()
         {
             if (_detectedPlayer != null && _canDetectPlayer)
             {
-                // Calculate the direction towards the player but keep the z level constant
                 _moveDirection = new Vector3(
                     _detectedPlayer.position.x - gameObject.transform.position.x,
                     _detectedPlayer.position.y - gameObject.transform.position.y,
                     0f
                 );
 
-                // Check if within 1f range and same z level to "attack"
                 float distance = Vector2.Distance(new Vector2(_objectToMove.position.x, _objectToMove.position.y),
                                                   new Vector2(_detectedPlayer.position.x, _detectedPlayer.position.y));
 
@@ -74,26 +80,24 @@ namespace GDT1.AIBot
 
         private void UpdateScale()
         {
-            // Find the index of the current z-level in the array
-            int zIndex = System.Array.IndexOf(zLevels, _currentZLevel);
-            if (zIndex >= 0)
+            if (_currentZLevel == 0.5f)
             {
-                float scale = scales[zIndex];
-                _objectToMove.localScale = new Vector3(scale, scale, 1f);
-
-                // Debugging: Log the new scale and z-level to ensure it's being calculated and applied correctly
-                Debug.Log($"Enemy new scale: {_objectToMove.localScale} at z-level: {_currentZLevel}");
+                _objectToMove.localScale = _smallSize;
             }
-            else
+            else if (_currentZLevel == 1.0f)
             {
-                Debug.LogWarning("Z-level not found in predefined levels. No scale change applied.");
+                _objectToMove.localScale = _normalSize;
+            }
+            else if (_currentZLevel == 1.5f)
+            {
+                _objectToMove.localScale = _bigSize;
             }
         }
 
         private IEnumerator StartMovingAfterDelay(float delay)
         {
             yield return new WaitForSeconds(delay);
-            _canDetectPlayer = true; // Allow the AI to start detecting the player after the delay
+            _canDetectPlayer = true;
             StartMoving();
         }
 
@@ -103,7 +107,7 @@ namespace GDT1.AIBot
             {
                 _moveDirection = Random.insideUnitCircle;
                 yield return new WaitForSeconds(_timeBetweenChose);
-                UpdateScale(); // Update scale during movement to reflect any changes in z-level
+                UpdateScale();
             }
         }
 
@@ -112,10 +116,8 @@ namespace GDT1.AIBot
             float speed = _detectedPlayer == null ? _speed : _speed + _speed * _acceleration;
             Vector3 newPosition = _objectToMove.position + _moveDirection.normalized * speed * Time.deltaTime;
 
-            // Clamp the new position to stay within the playground bounds
             newPosition.x = Mathf.Clamp(newPosition.x, _minBounds.x, _maxBounds.x);
             newPosition.y = Mathf.Clamp(newPosition.y, _minBounds.y, _maxBounds.y);
-            // No need to change z position, we are adjusting scale instead
 
             _objectToMove.position = newPosition;
         }
@@ -131,9 +133,7 @@ namespace GDT1.AIBot
 
         private void AttackPlayer()
         {
-            // Logic for attacking or killing the player
             Debug.Log("Player attacked!");
-            // Implement the logic for damaging or killing the player here
         }
 
         private void StartMoving()
@@ -153,12 +153,11 @@ namespace GDT1.AIBot
                 float distanceToPlayer = Vector2.Distance(new Vector2(transform.position.x, transform.position.y), 
                                                           new Vector2(collision.transform.position.x, collision.transform.position.y));
 
-                // Only detect the player if far enough from the spawn point
                 if (distanceToPlayer >= _minSpawnDistanceFromPlayer)
                 {
                     _detectedPlayer = collision.gameObject.transform;
-                    _currentZLevel = _detectedPlayer.position.z; // Match z-level
-                    UpdateScale(); // Update scale immediately to reflect matching z-level
+                    _currentZLevel = _detectedPlayer.position.z;
+                    UpdateScale();
                 }
             }
         }
@@ -169,8 +168,8 @@ namespace GDT1.AIBot
             {
                 _detectedPlayer = null;
                 _moveDirection = Random.insideUnitCircle;
-                _currentZLevel = 1f; // Reset to default z-level when player is no longer detected
-                UpdateScale(); // Revert scale when the player is out of range
+                _currentZLevel = 1f;
+                UpdateScale();
             }
         }
     }
