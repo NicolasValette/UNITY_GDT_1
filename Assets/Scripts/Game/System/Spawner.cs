@@ -40,8 +40,6 @@ namespace GDT1.Game.System
             {
                 _spawningPositions.Add(transform.GetChild(i));
             }
-
-            StartCoroutine(SpawnUntilTimer());
         }
 
         private void Spawn()
@@ -79,6 +77,11 @@ namespace GDT1.Game.System
         private void StopSpawning()
         {
             _spawningIsOn = false;
+        }
+
+        public void StartSpawning()
+        {
+            StartCoroutine(SpawnUntilTimer());
         }
 
         private IEnumerator SpawnUntilTimer()
