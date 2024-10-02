@@ -18,6 +18,12 @@ namespace GDT1.Inputs
 
         private bool _isFirePressed = false;
         private float _timeSinceLastShoot = 0f;
+        private Transform _bulletRoot;
+
+        private void Start()
+        {
+            _bulletRoot = new GameObject("Bullet Root").transform;
+        }
 
         void Update()
         {
@@ -45,6 +51,7 @@ namespace GDT1.Inputs
         private void ShootBullet()
         {
             GameObject bullet = Instantiate(_bulletPrefab, _bulletSpawnPos.position, gameObject.transform.rotation);
+            bullet.transform.parent = _bulletRoot;
             bullet.GetComponent<Rigidbody2D>().AddForce(gameObject.transform.up * _bulletSpeed, ForceMode2D.Impulse);
             Destroy(bullet, _bulletLifeTime);
             _timeSinceLastShoot = 0f;
